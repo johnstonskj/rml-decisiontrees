@@ -10,7 +10,7 @@
 (require
   rackunit
 
-  "../main.rkt")
+  rml-decisiontrees)
 
 (define test-decision
   (make-decision

@@ -8,9 +8,8 @@
 [![GitHub stars](https://img.shields.io/github/stars/johnstonskj/rml-core.svg)](https://github.com/johnstonskj/rml-core/stargazers)
 ![MIT License](https://img.shields.io/badge/license-MIT-118811.svg)
 
-This package implements a set of Decision Tree algorithms
-
-TBD
+This Package is part of a set of packages implementing machine learning capabilities for Racket.
+This particular package implements support for classification of individuals using decision trees.
 
 # Modules
 
@@ -22,4 +21,18 @@ TBD
 (require rml/individual
          rml-decision-trees)
 
+(define test-tree
+ (make-decision-tree
+   (make-decision
+    "size"
+    (list [cons (curryr < 5) (make-terminal 'small)]
+          [cons (curryr > 10) (make-terminal 'large)])
+    #:else (make-decision
+            "color"
+            (list [cons (curry string=? "black") (make-terminal 'cocktail)])
+                  #:else (make-terminal 'medium)))))
+
+(define test-individual (make-hash (list (cons "size" 3) (cons "color" "black"))))
+
+(tree-classify test-tree test-individual)
 ```
