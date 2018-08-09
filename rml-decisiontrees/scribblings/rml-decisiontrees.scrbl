@@ -95,7 +95,7 @@ for example:
                          (cons/c
                            (-> serializable? boolean?)
                            tree-node?))]
-           [#:else else-node tree-node?])
+           [#:else else-node tree-node? null])
          decision-node?]{
 Construct a new @racket[decision-node], where @racket[cond-pairs] represents
 a set of condition/outcome pairs that test the value of the specified feature.
@@ -109,7 +109,7 @@ If no condition predicate returns @racket[#t] and a value exists for
 
 @defproc[(make-terminal
            [value serializable?]
-           [#:error is-error boolean?])
+           [#:error is-error boolean? #t])
          terminal-node?]{
 Construct a new @racket[terminal-node] to return @racket[value] as the classification
 result. If @racket[is-error] is @racket[#t] the result is treated as an error
@@ -124,7 +124,7 @@ condition.
            [individual individual?])
          serializable?]{
 Return the classification value(s) represented by the @racket[terminal-node]
-at the end of a path through the decision tree. 
+at the end of a path through the decision tree.
 
 Note that the value @racket[drop-through-error] may be returned in the case that
 a decision does not have a predicate for the given feature value and no
@@ -140,8 +140,9 @@ classification value. Note that values are returned with the latest decision fir
 and the root decision last.
 }
 
-@defthing[drop-through-error terminal-node?]{
-A specific value that denotes a non-exhaustive decision.
+@defthing[drop-through-error symbol?]{
+A specific classification value that denotes a non-exhaustive decision (a decision node
+did not have a matching outcome for the feature's value).
 }
 
 @defparam[sandbox-predicates sandbox-enable boolean? #:value #t]{

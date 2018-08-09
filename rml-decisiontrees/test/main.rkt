@@ -9,8 +9,10 @@
 
 (require
   rackunit
-
+  ; ---------
   rml-decisiontrees)
+
+;; ---------- Test Fixtures
 
 (define test-decision
   (make-decision
@@ -24,22 +26,32 @@
 
 (define test-tree (make-decision-tree test-decision))
 
+;; ---------- Internal procedures
+
+(define (simple-success-test sandboxed)
+  (parameterize ([sandbox-predicates sandboxed])
+    (let ([individual (make-hash (list (cons "size" 3) (cons "color" "black")))])
+      (check-eq? (tree-classify test-tree individual) 'small)
+      (check-eq? (length (tree-trace test-tree)) 2))
+    (let ([individual (make-hash (list (cons "size" 12) (cons "color" "black")))])
+      (check-eq? (tree-classify test-tree individual) 'large)
+      (check-eq? (length (tree-trace test-tree)) 2))
+    (let ([individual (make-hash (list (cons "size" 6) (cons "color" "black")))])
+      (check-eq? (tree-classify test-tree individual) 'cocktail)
+      (check-eq? (length (tree-trace test-tree)) 3))
+    (let ([individual (make-hash (list (cons "size" 6) (cons "color" "blue")))])
+      (check-eq? (tree-classify test-tree individual) 'medium)
+      (check-eq? (length (tree-trace test-tree)) 3))))
+
 ;; ---------- Test Cases
 
 (test-case
- "test a very simple decision tree"
- (let ([individual (make-hash (list (cons "size" 3) (cons "color" "black")))])
-   (check-eq? (tree-classify test-tree individual) 'small)
-   (check-eq? (length (tree-trace test-tree)) 2))
- (let ([individual (make-hash (list (cons "size" 12) (cons "color" "black")))])
-   (check-eq? (tree-classify test-tree individual) 'large)
-   (check-eq? (length (tree-trace test-tree)) 2))
- (let ([individual (make-hash (list (cons "size" 6) (cons "color" "black")))])
-   (check-eq? (tree-classify test-tree individual) 'cocktail)
-   (check-eq? (length (tree-trace test-tree)) 3))
- (let ([individual (make-hash (list (cons "size" 6) (cons "color" "blue")))])
-   (check-eq? (tree-classify test-tree individual) 'medium)
-   (check-eq? (length (tree-trace test-tree)) 3)))
+ "test a very simple decision tree (sandboxed)"
+ (simple-success-test #t))
+
+(test-case
+ "test a very simple decision tree (not-sandboxed)"
+ (simple-success-test #f))
 
 (test-case
  "fail on fall-through"
@@ -51,3 +63,5 @@
         [individual (make-hash (list (cons "size" 6) (cons "color" "black")))]
         [classifier (tree-classify tree individual)])
    (check-equal? classifier drop-through-error)))
+
+  
