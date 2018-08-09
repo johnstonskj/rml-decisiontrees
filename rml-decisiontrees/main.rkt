@@ -15,8 +15,9 @@
    (-> decision-node? (or/c decision-tree? null?))]
 
   [make-decision
-   (-> non-empty-string?
-       (non-empty-listof (cons/c (-> any/c boolean?) tree-node?)) #:else tree-node?
+   (->* (non-empty-string?
+         (non-empty-listof (cons/c (-> any/c boolean?) tree-node?)))
+        (#:else tree-node?)
        decision-node?)]
 
   [make-terminal
@@ -25,7 +26,7 @@
   [tree-trace
    (-> decision-tree? (listof string?))]
 
-  [drop-through-error terminal-node?])
+  [drop-through-error symbol?])
 
  sandbox-predicates)
 
@@ -52,8 +53,8 @@
    else-node))
 
 (struct terminal-node tree-node
-   (value
-    is-error))
+  (value
+   is-error))
 
 (struct trace-entry
   (feature-name
@@ -73,7 +74,7 @@
 
 (define (tree-trace tree)
   (for/list ([trace (decision-tree-history tree)])
-      (display-trace trace)))
+    (display-trace trace)))
 
 (define (make-decision-tree root-decision)
   (if (tree-validate root-decision)
@@ -88,12 +89,25 @@
 (define (make-terminal terminal-value #:error [is-error #f])
   (terminal-node terminal-value is-error))
 
-(define drop-through-error (make-terminal (gensym) #:error #t))
+(define drop-through-error 'err:fail:drop-through)
+
+(define drop-through-terminal (make-terminal drop-through-error #:error #t))
 
 ;; ---------- Internal procedures
 
-(define (tree-validate tree)
-  #t)
+(define (tree-validate root-node)
+  (node-validate root-node (set)))
+
+(define (node-validate node node-set)
+  (if (set-member? node-set node)
+      ;; indicates a loop of some kind
+      #f
+      (if (decision-node? node)
+          (let ([new-node-set (set-add node-set node)])
+            (for ([pair (decision-node-cond-pairs node)])
+              (node-validate (cdr pair) new-node-set)))
+          ;; has to be a terminal node
+          #t)))
 
 (define (make-tree-evaluator)
   (parameterize ([sandbox-output 'string]
@@ -127,7 +141,7 @@
       (if (equal? outcome #f)
           (if (not (null? (decision-node-else-node decision)))
               (trace-entry feature-name feature-value (decision-node-else-node decision))
-              (trace-entry feature-name feature-value drop-through-error))
+              (trace-entry feature-name feature-value drop-through-terminal))
           outcome))))
 
 (define (evaluate-predicate evaluator predicate value)
