@@ -15,9 +15,10 @@
   "base"
   "rml-core"
   "math-lib"
+  "sandbox-lib"
+  "racket-index"
   "rackunit-lib"))
 (define build-deps '(
   "scribble-lib"
   "racket-doc"
-  "sandbox-lib"
   "cover-coveralls"))
