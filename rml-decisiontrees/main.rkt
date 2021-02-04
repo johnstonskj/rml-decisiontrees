@@ -67,7 +67,7 @@
 
 (define evaluator-memory-limit 16) ;; Mb
 
-(define evaluator-time-limit 2.0) ;; seconds
+(define evaluator-time-limit 4.0) ;; seconds
 
 (define (tree-classify tree individual)
   (evaluate-tree tree individual))
