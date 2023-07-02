@@ -6,6 +6,6 @@
 ;;
 
 (define collection "rml-decisiontrees")
-(define scribblings '(("scribblings/rml-decisiontrees.scrbl" ())))
+(define scribblings '(("scribblings/rml-decisiontrees.scrbl" () ("Machine Learning"))))
 
 (define test-omit-paths '("scribblings"))
